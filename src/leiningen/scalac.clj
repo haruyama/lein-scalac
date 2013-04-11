@@ -15,8 +15,8 @@
 (defn scalac
   "Compile Scala source in :scala-source-path to :compile-path.
 
-Set :scalac-options in project.clj to pass options to the Scala compiler.
-See http://www.scala-lang.org/node/98 for details."
+  Set :scalac-options in project.clj to pass options to the Scala compiler.
+  See http://www.scala-lang.org/node/98 for details."
   [project]
   (let [classpath (classpath/get-classpath-string project)
         task (doto (lancet/instantiate-task lancet/ant-project "scalac"

@@ -1,6 +1,6 @@
 (defproject com.duramec/lein-scalac "0.1.1"
             :description "Compile Scala Using Leiningen"
+            :min-lein-version "2.0.0"
             :eval-in-project true
-            :license {:name "Eclipse Public License"}
-            :dependencies [[org.scala-lang/scala-compiler "2.9.1"]
-                           [lancet "1.0.1"]])
+            :license {:name "Eclipse Public License"})
+

@@ -1,27 +1,33 @@
 (ns leiningen.scalac
+  (:use [leiningen.core.eval :only [eval-in-project]])
   (:require [leiningen.classpath :as classpath]
-            [leiningen.core.main :as lein]
-            [leiningen.core.eval :as eval]))
+            [leiningen.core.main :as lein]))
 
 (defn- task-props
   [project]
-  (merge {:destdir (:compile-path project)}
-         (:scalac-options project)))
+  (let [{:keys [compile-path scalac-options]} project]
+    (merge {:destdir compile-path} scalac-options)))
 
-(defn- scalac-form
-  [project classpath]
-  `(do
+
+(def init-form
+  '(do
      (import scala.tools.ant.Scalac)
      (import org.apache.tools.ant.types.Path)
+     (require '[lancet.core :as lancet])))
+
+(defn- make-scalac-form
+  [project classpath]
+  `(do
      (.addTaskDefinition lancet/ant-project "scalac" scala.tools.ant.Scalac)
      (lancet/define-ant-task ~'ant-scalac ~'scalac)
      (let [props# ~(task-props project)
            classpath# (Path. lancet/ant-project ~classpath)
-           task# (doto (lancet/instantiate-task lancet/ant-project "scalac" props#)
+           task# (doto 
+                   (lancet/instantiate-task lancet/ant-project "scalac" props#)
                    (.setClasspath classpath#)
                    (.setIncludes "**/*.scala"))]
-       (doseq [p# ~(into [] (:scala-source-paths project))] 
-         (.setSrcdir task# (Path. lancet/ant-project p#)))
+       (doseq [path# ~(into [] (:scala-source-paths project))] 
+         (.setSrcdir task# (Path. lancet/ant-project path#)))
        (lancet/mkdir {:dir ~(:compile-path project)})
        (.execute task#))))
 
@@ -36,8 +42,6 @@
   (if (not (:scala-source-paths project))
     (lein/abort "lein scalac: You must specify :scala-source-paths [] in your project.clj"))
   (let [classpath (classpath/get-classpath-string project)
-        eval-form (scalac-form project classpath)
-        eval-ns '(require '[lancet.core :as lancet])]
-    ; last argument addresses http://technomancy.us/143
-    (eval/eval-in-project project eval-form eval-ns)))
+        scalac-form (make-scalac-form project classpath)]
+    (eval-in-project project scalac-form init-form)))
 

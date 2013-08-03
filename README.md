@@ -4,7 +4,7 @@ Compile Scala source from Leiningen.
 
 ## Usage
 
-Add `[com.duramec/lein-scalac "0.1.1"]` to `:plugins` project.clj.
+Add `[haruyama/lein-scalac "0.1.1"]` to `:plugins` project.clj.
 
 Set `:scala-source-paths` in project.clj and place your `.scala`
 source files in those directories.
